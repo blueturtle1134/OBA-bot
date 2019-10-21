@@ -1,7 +1,7 @@
 package oba.money;
 
 public class Account {
-	private static final long DAY_LENGTH = 0;
+	private static final long DAY_LENGTH = 1000*60*60*24;
 	long id;
 	String user;
 	int balance;
