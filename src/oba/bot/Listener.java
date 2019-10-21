@@ -17,7 +17,7 @@ public class Listener extends ListenerAdapter {
 	@Override
 	public void onMessageReceived(MessageReceivedEvent e) {
 		MessageChannel channel = e.getChannel();
-		if(channel.getId() == Application.getProperties().get("bank_channel")) {
+		if(channel.getId().equals(Application.getProperties().get("bank_channel"))) {
 			String contentRaw = e.getMessage().getContentRaw();
 			String[] line = contentRaw.split(" ",4);
 			User author = e.getAuthor();

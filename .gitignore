@@ -24,3 +24,5 @@ hs_err_pid*
 .classpath
 /bin/
 config.txt
+bank.txt
+log.txt

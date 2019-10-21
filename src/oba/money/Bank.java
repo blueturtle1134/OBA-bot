@@ -3,12 +3,13 @@ package oba.money;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import oba.bot.Application;
-
 import java.util.Scanner;
+
+import net.dv8tion.jda.api.entities.User;
+import oba.bot.Application;
 
 public class Bank {
 
@@ -30,26 +31,33 @@ public class Bank {
 				e.printStackTrace();
 			}
 		}
+		
+		accounts = new HashMap<Long, Account>();
 	}
 	
 	public Account getAccount(long id) {
+		if(!accounts.containsKey(id)) {
+			open(Application.getDiscord().getUserById(id));
+		}
 		return accounts.get(id);
 	}
 	
 	public int getBalance(long id) {
-		if(accounts.containsKey(id)) {
-			return accounts.get(id).getBalance();
+		if(!accounts.containsKey(id)) {
+			open(Application.getDiscord().getUserById(id));
 		}
-		else {
-			return 0;
-		}
+		return accounts.get(id).getBalance();
+	}
+	
+	public void open(User user) {
+		Account newAccount = new Account(user.getIdLong(), user.getName());
+		accounts.put(user.getIdLong(), newAccount);
+		Application.log("Created new account for "+newAccount.getName()+" ("+user.getIdLong()+")");
 	}
 	
 	public void change(long id, int delta) {
 		if(!accounts.containsKey(id)) {
-			Account newAccount = new Account(id, Application.getDiscord().getUserById(id).getName());
-			accounts.put(id, newAccount);
-			Application.log("Created new account for "+newAccount.getName()+" ("+id+")");
+			open(Application.getDiscord().getUserById(id));
 		}
 		Account account = accounts.get(id);
 		account.setBalance(account.getBalance()+delta);
