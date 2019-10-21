@@ -22,11 +22,11 @@ public class Listener extends ListenerAdapter {
 			String[] line = contentRaw.split(" ",4);
 			User author = e.getAuthor();
 			long authorId = author.getIdLong();
-			if(line[0].equalsIgnoreCase("Transfer")) {
+			if(line[0].equals(">transfer")) {
 				List<User> usersByName = discord.getUsersByName(line[1], true);
 				if(usersByName.size()>0) {
 					long dest = usersByName.get(0).getIdLong();
-					int amount = Integer.parseInt(line[3]);
+					int amount = Integer.parseInt(line[2]);
 					if(bank.getBalance(authorId)>amount) {
 						bank.change(authorId, -1*amount);
 						bank.change(dest, amount);
@@ -38,15 +38,15 @@ public class Listener extends ListenerAdapter {
 					}
 				}
 			}
-			if(contentRaw.contains("balance")) {
+			if(contentRaw.equals(">balance")) {
 				channel.sendMessage(author.getAsMention()+", you have "+bank.getBalance(author.getIdLong())+" Chrona.");
 			}
-			if(contentRaw.contains("daily")) {
+			if(contentRaw.equals(">daily")) {
 				if(bank.getAccount(authorId).canDaily()) {
-					int dailyReward = 5;
+					int dailyReward = 5 + (int)(Math.random()*4);
 					bank.change(authorId, dailyReward);
 					channel.sendMessage(author.getAsMention()+" claims a daily reward of "+dailyReward+" Chrona.");
-					Application.log(author.getName()+" ("+authorId+") claims a daily reward of "+dailyReward+" Chrona.");
+					Application.log(author.getName()+" claims a daily reward of "+dailyReward+" Chrona.");
 					bank.getAccount(authorId).resetDaily();
 				}
 			}
