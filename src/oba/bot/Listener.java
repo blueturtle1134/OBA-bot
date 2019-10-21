@@ -22,7 +22,7 @@ public class Listener extends ListenerAdapter {
 			String[] line = contentRaw.split(" ",4);
 			User author = e.getAuthor();
 			long authorId = author.getIdLong();
-			if(line[0].equalsIgnoreCase(">transfer")) {
+			if(line[0].equals(">transfer")) {
 				List<User> usersByName = discord.getUsersByName(line[1], true);
 				if(usersByName.size()>0) {
 					long dest = usersByName.get(0).getIdLong();
@@ -38,10 +38,10 @@ public class Listener extends ListenerAdapter {
 					}
 				}
 			}
-			if(contentRaw.contains(">balance")) {
+			if(contentRaw.equals(">balance")) {
 				channel.sendMessage(author.getAsMention()+", you have "+bank.getBalance(author.getIdLong())+" Chrona.");
 			}
-			if(contentRaw.contains(">daily")) {
+			if(contentRaw.equals(">daily")) {
 				if(bank.getAccount(authorId).canDaily()) {
 					int dailyReward = 5 + (int)(Math.random()*4);
 					bank.change(authorId, dailyReward);
