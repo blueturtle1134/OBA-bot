@@ -7,9 +7,9 @@ import java.util.Properties;
 
 import javax.security.auth.login.LoginException;
 
-import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.JDABuilder;
-import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.TextChannel;
 import oba.money.Bank;
 
 public class Application {
