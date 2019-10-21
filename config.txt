@@ -1,5 +1,0 @@
-token=
-log_channel=635338708727496716
-bank_channel=635338756697751552
-log_file=log.txt
-bank_file=bank.txt
