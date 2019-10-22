@@ -49,6 +49,9 @@ public class Listener extends ListenerAdapter {
 					Application.log(author.getName()+" claims a daily reward of "+dailyReward+" Chrona.");
 					bank.getAccount(authorId).resetDaily();
 				}
+				else {
+					channel.sendMessage(author.getAsMention()+" has already claimed a reward in the last 24 hours!").queue();
+				}
 			}
 		}
 	}
