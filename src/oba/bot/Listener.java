@@ -31,21 +31,21 @@ public class Listener extends ListenerAdapter {
 						bank.change(authorId, -1*amount);
 						bank.change(dest, amount);
 						Application.log("Transferred "+amount+" Chrona from "+bank.getAccount(authorId).getName()+" to "+bank.getAccount(dest).getName());
-						channel.sendMessage(amount+" Chrona delivered to "+discord.getUserById(dest).getAsMention());
+						channel.sendMessage(amount+" Chrona delivered to "+discord.getUserById(dest).getAsMention()).queue();
 					}
 					else {
-						channel.sendMessage(author.getAsMention()+", you do not have enough Chrona to send!");
+						channel.sendMessage(author.getAsMention()+", you do not have enough Chrona to send!").queue();
 					}
 				}
 			}
 			if(contentRaw.equals(">balance")) {
-				channel.sendMessage(author.getAsMention()+", you have "+bank.getBalance(author.getIdLong())+" Chrona.");
+				channel.sendMessage(author.getAsMention()+", you have "+bank.getBalance(author.getIdLong())+" Chrona.").queue();
 			}
 			if(contentRaw.equals(">daily")) {
 				if(bank.getAccount(authorId).canDaily()) {
 					int dailyReward = 5 + (int)(Math.random()*4);
 					bank.change(authorId, dailyReward);
-					channel.sendMessage(author.getAsMention()+" claims a daily reward of "+dailyReward+" Chrona.");
+					channel.sendMessage(author.getAsMention()+" claims a daily reward of "+dailyReward+" Chrona.").queue();
 					Application.log(author.getName()+" claims a daily reward of "+dailyReward+" Chrona.");
 					bank.getAccount(authorId).resetDaily();
 				}
