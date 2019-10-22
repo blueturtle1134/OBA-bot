@@ -18,12 +18,17 @@ public class Bank {
 	
 	public Bank(String fileLocation) {
 		saveFile = new File(fileLocation);
+		
+		accounts = new HashMap<Long, Account>();
 		if(saveFile.exists()) {
 			try {
 				Scanner scanner = new Scanner(saveFile);
 				while(scanner.hasNextLine()) {
-					Account next = Account.load(scanner.nextLine());
-					accounts.put(next.getId(), next);
+					String nextLine = scanner.nextLine();
+					if (!nextLine.equals("")) {
+						Account next = Account.load(nextLine);
+						accounts.put(next.getId(), next);
+					}
 				}
 				scanner.close();
 			} catch (FileNotFoundException e) {
@@ -31,8 +36,6 @@ public class Bank {
 				e.printStackTrace();
 			}
 		}
-		
-		accounts = new HashMap<Long, Account>();
 	}
 	
 	public Account getAccount(long id) {

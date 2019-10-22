@@ -55,7 +55,7 @@ public class Account {
 	
 	public static Account load(String string) {
 		String[] line = string.split(" ");
-		return new Account(Long.parseLong(line[0]), line[1], Integer.parseInt(line[2]), Long.parseLong(line[4]));
+		return new Account(Long.parseLong(line[0]), line[1], Integer.parseInt(line[2]), Long.parseLong(line[3]));
 	}
 	
 	public String save() {
