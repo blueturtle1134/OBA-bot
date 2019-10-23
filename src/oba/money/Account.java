@@ -3,20 +3,24 @@ package oba.money;
 public class Account {
 	private static final long DAY_LENGTH = 1000*60*60*24;
 	long id;
-	String user;
+	String name;
 	int balance;
 	long lastDaily;
 	
-	Account(long id, String user, int balance, long lastDaily) {
+	public Account() {
+		
+	}
+	
+	public Account(long id, String name, int balance, long lastDaily) {
 		this.id = id;
-		this.user = user;
+		this.name = name;
 		this.balance = balance;
 		this.lastDaily = lastDaily;
 	}
 	
-	Account(long id, String user) {
+	public Account(long id, String name) {
 		this.id = id;
-		this.user = user;
+		this.name = name;
 		this.balance = 0;
 		this.lastDaily = 0;
 	}
@@ -30,11 +34,11 @@ public class Account {
 	}
 
 	public String getName() {
-		return user;
+		return name;
 	}
 
-	public void setUser(String user) {
-		this.user = user;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public int getBalance() {
@@ -53,9 +57,17 @@ public class Account {
 		this.lastDaily = System.currentTimeMillis();
 	}
 	
+	public long getLastDaily() {
+		return lastDaily;
+	}
+
+	public void setLastDaily(long lastDaily) {
+		this.lastDaily = lastDaily;
+	}
+
 	public static Account load(String string) {
 		String[] line = string.split(" ");
-		return new Account(Long.parseLong(line[0]), line[1], Integer.parseInt(line[2]), Long.parseLong(line[4]));
+		return new Account(Long.parseLong(line[0]), line[1], Integer.parseInt(line[2]), Long.parseLong(line[3]));
 	}
 	
 	public String save() {
