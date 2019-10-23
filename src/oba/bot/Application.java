@@ -1,11 +1,14 @@
 package oba.bot;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Properties;
 
 import javax.security.auth.login.LoginException;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -49,7 +52,19 @@ public class Application {
 		log = discord.getTextChannelById((String) properties.get("log_channel"));
 		
 		//Make the bank
-		bank = new Bank((String) properties.get("bank_file"));
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			File file = new File((String) properties.get("bank_file"));
+			if(file.exists()) {
+				bank = mapper.readValue(file, Bank.class);
+			}
+			else {
+				bank = new Bank();
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		//Start listener
 		discord.addEventListener(new Listener());

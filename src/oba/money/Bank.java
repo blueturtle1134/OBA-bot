@@ -1,13 +1,9 @@
 package oba.money;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Scanner;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -35,23 +31,9 @@ public class Bank {
 		accounts = new HashMap<Long, Account>();
 	}
 	
-	public Bank(String fileLocation) {
-		saveFile = new File(fileLocation);
-		
+	public Bank(File saveFile) {
+		this.saveFile = saveFile;
 		accounts = new HashMap<Long, Account>();
-		if(saveFile.exists()) {
-			try {
-				Scanner scanner = new Scanner(saveFile);
-				while(scanner.hasNextLine()) {
-					Account next = Account.load(scanner.nextLine());
-					accounts.put(next.getId(), next);
-				}
-				scanner.close();
-			} catch (FileNotFoundException e) {
-				// Should never happen because we checked for existence
-				e.printStackTrace();
-			}
-		}
 	}
 	
 	public Account getAccount(long id) {
@@ -84,13 +66,10 @@ public class Bank {
 	}
 	
 	public void save() {
+		ObjectMapper mapper = new ObjectMapper();
 		try {
-			PrintWriter output = new PrintWriter(saveFile);
-			for(Entry<Long,Account> x : accounts.entrySet()) {
-				output.println(x.getValue().save());
-			}
-			output.close();
-		} catch (FileNotFoundException e) {
+			mapper.writeValue(saveFile, this);
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -116,6 +95,7 @@ public class Bank {
 				generator.writeObject(bank.accounts.get(a));
 			}
 			generator.writeEndArray();
+			generator.writeStringField("file", bank.saveFile.getPath());
 			generator.writeEndObject();
 		}
 
@@ -145,6 +125,7 @@ public class Bank {
 			for(Account a : mapper.treeToValue(node.get("accounts"), Account[].class)) {
 				bank.accounts.put(a.id, a);
 			}
+			bank.saveFile = new File(mapper.treeToValue(node.get("file"), String.class));
 			return bank;
 		}
 		
