@@ -19,10 +19,10 @@ public class Listener extends ListenerAdapter {
 		MessageChannel channel = e.getChannel();
 		if(channel.getId().equals(Application.getProperties().get("bank_channel"))) {
 			String contentRaw = e.getMessage().getContentRaw();
-			String[] line = contentRaw.split(" ",4);
 			User author = e.getAuthor();
 			long authorId = author.getIdLong();
-			if(line[0].equals(">transfer")) {
+			if(contentRaw.matches("^>transfer .+ \\d+")) {
+				String[] line = contentRaw.split(" ",4);
 				List<User> usersByName = discord.getUsersByName(line[1], true);
 				if(usersByName.size()>0) {
 					long dest = usersByName.get(0).getIdLong();
@@ -36,6 +36,9 @@ public class Listener extends ListenerAdapter {
 					else {
 						channel.sendMessage(author.getAsMention()+", you do not have enough Chrona to send!");
 					}
+				}
+				else {
+					channel.sendMessage("Name not recognized. Use the username without an @ or # and ID. Nicknames don't work yet.").queue();
 				}
 			}
 			if(contentRaw.equals(">balance")) {
