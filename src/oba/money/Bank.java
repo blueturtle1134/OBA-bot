@@ -24,15 +24,9 @@ import oba.bot.Application;
 @JsonDeserialize(using = Bank.BankDeserializer.class)
 public class Bank {
 
-	private File saveFile;
 	private Map<Long, Account> accounts;
 	
 	public Bank() {
-		accounts = new HashMap<Long, Account>();
-	}
-	
-	public Bank(File saveFile) {
-		this.saveFile = saveFile;
 		accounts = new HashMap<Long, Account>();
 	}
 	
@@ -62,10 +56,9 @@ public class Bank {
 		}
 		Account account = accounts.get(id);
 		account.setBalance(account.getBalance()+delta);
-		save();
 	}
 	
-	public void save() {
+	public void save(File saveFile) {
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			mapper.writeValue(saveFile, this);
@@ -95,7 +88,6 @@ public class Bank {
 				generator.writeObject(bank.accounts.get(a));
 			}
 			generator.writeEndArray();
-			generator.writeStringField("file", bank.saveFile.getPath());
 			generator.writeEndObject();
 		}
 
@@ -125,7 +117,6 @@ public class Bank {
 			for(Account a : mapper.treeToValue(node.get("accounts"), Account[].class)) {
 				bank.accounts.put(a.id, a);
 			}
-			bank.saveFile = new File(mapper.treeToValue(node.get("file"), String.class));
 			return bank;
 		}
 		
