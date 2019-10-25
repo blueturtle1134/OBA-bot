@@ -1,41 +1,33 @@
 package oba.money;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Scanner;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import net.dv8tion.jda.api.entities.User;
 import oba.bot.Application;
 
+@JsonSerialize(using = Bank.BankSerializer.class)
+@JsonDeserialize(using = Bank.BankDeserializer.class)
 public class Bank {
 
-	private File saveFile;
 	private Map<Long, Account> accounts;
 	
-	public Bank(String fileLocation) {
-		saveFile = new File(fileLocation);
-		
+	public Bank() {
 		accounts = new HashMap<Long, Account>();
-		if(saveFile.exists()) {
-			try {
-				Scanner scanner = new Scanner(saveFile);
-				while(scanner.hasNextLine()) {
-					String nextLine = scanner.nextLine();
-					if (!nextLine.equals("")) {
-						Account next = Account.load(nextLine);
-						accounts.put(next.getId(), next);
-					}
-				}
-				scanner.close();
-			} catch (FileNotFoundException e) {
-				// Should never happen because we checked for existence
-				e.printStackTrace();
-			}
-		}
 	}
 	
 	public Account getAccount(long id) {
@@ -64,19 +56,69 @@ public class Bank {
 		}
 		Account account = accounts.get(id);
 		account.setBalance(account.getBalance()+delta);
-		save();
 	}
 	
-	public void save() {
+	public void save(File saveFile) {
+		ObjectMapper mapper = new ObjectMapper();
 		try {
-			PrintWriter output = new PrintWriter(saveFile);
-			for(Entry<Long,Account> x : accounts.entrySet()) {
-				output.println(x.getValue().save());
-			}
-			output.close();
-		} catch (FileNotFoundException e) {
+			mapper.writeValue(saveFile, this);
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public static class BankSerializer extends StdSerializer<Bank> {
+		
+		private static final long serialVersionUID = 1L;
+
+		public BankSerializer() {
+			this(null);
+		}
+
+		public BankSerializer(Class<Bank> t) {
+			super(t);
+		}
+
+		@Override
+		public void serialize(Bank bank, JsonGenerator generator, SerializerProvider provider) throws IOException {
+			generator.writeStartObject();
+			generator.writeArrayFieldStart("accounts");
+			for(Long a : bank.accounts.keySet()) {
+				generator.writeObject(bank.accounts.get(a));
+			}
+			generator.writeEndArray();
+			generator.writeEndObject();
+		}
+
+	}
+	
+	public static class BankDeserializer extends StdDeserializer<Bank>{
+		
+		private static final long serialVersionUID = 1L;
+
+		public BankDeserializer() {
+			this(null);
+		}
+
+		public BankDeserializer(Class<Bank> vc) {
+			super(vc);
+		}
+
+		@Override
+		public Bank deserialize(JsonParser parser, DeserializationContext context)
+				throws IOException, JsonProcessingException {
+			Bank bank = new Bank();
+			JsonNode node = parser.getCodec().readTree(parser);
+			ObjectMapper mapper = new ObjectMapper();
+			System.out.println(node.get("accounts"));
+			Account[] treeToValue = mapper.treeToValue(node.get("accounts"), Account[].class);
+			System.out.println(treeToValue);
+			for(Account a : mapper.treeToValue(node.get("accounts"), Account[].class)) {
+				bank.accounts.put(a.id, a);
+			}
+			return bank;
+		}
+		
 	}
 }
