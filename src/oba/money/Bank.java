@@ -111,9 +111,6 @@ public class Bank {
 			Bank bank = new Bank();
 			JsonNode node = parser.getCodec().readTree(parser);
 			ObjectMapper mapper = new ObjectMapper();
-			System.out.println(node.get("accounts"));
-			Account[] treeToValue = mapper.treeToValue(node.get("accounts"), Account[].class);
-			System.out.println(treeToValue);
 			for(Account a : mapper.treeToValue(node.get("accounts"), Account[].class)) {
 				bank.accounts.put(a.id, a);
 			}

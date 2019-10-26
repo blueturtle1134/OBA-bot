@@ -1,5 +1,6 @@
 package oba.bot;
 
+import java.io.File;
 import java.util.List;
 
 import net.dv8tion.jda.api.JDA;
@@ -55,6 +56,10 @@ public class Listener extends ListenerAdapter {
 				else {
 					channel.sendMessage(author.getAsMention()+" has already claimed a reward in the last 24 hours!").queue();
 				}
+			}
+			if(contentRaw.equals(">save")) {
+				bank.save(new File((String) Application.getProperties().get("bank_file")));
+				Application.log("Saved data.");
 			}
 		}
 	}
