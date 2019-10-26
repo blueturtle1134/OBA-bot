@@ -17,7 +17,6 @@ public class Listener extends ListenerAdapter {
 	String bankChannel = (String) Application.getProperties().get("bank_channel");
 	String fedChannel = (String) Application.getProperties().get("fed_channel");
 	String bankFile = (String) Application.getProperties().get("bank_file");
-	long wringTime = System.currentTimeMillis();
 	
 	@Override
 	public void onMessageReceived(MessageReceivedEvent e) {
@@ -58,8 +57,8 @@ public class Listener extends ListenerAdapter {
 				Application.log("Saved data.");
 			}
 			if(contentRaw.equals(">wring")) {
-				int hours = (int) ((System.currentTimeMillis()-wringTime)/(1000*60*60));
-				wringTime = System.currentTimeMillis();
+				int hours = (int) ((System.currentTimeMillis()-bank.getWringTime())/(1000*60*60));
+				bank.resetWring();
 				int amount = hours*hours;
 				bank.change(authorId, amount);
 				channel.sendMessage("It has been "+hours+" hours since the last wring.\n"+author.getAsMention()+" has wrung "+amount+" Chrona.").queue();

@@ -60,6 +60,7 @@ public class Application {
 			}
 			else {
 				bank = new Bank();
+				bank.resetWring();
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
