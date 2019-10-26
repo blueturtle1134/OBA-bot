@@ -25,7 +25,16 @@ import oba.bot.Application;
 public class Bank {
 
 	private Map<Long, Account> accounts;
+	private long wringTime;
 	
+	public long getWringTime() {
+		return wringTime;
+	}
+	
+	public void resetWring() {
+		wringTime = System.currentTimeMillis();
+	}
+
 	public Bank() {
 		accounts = new HashMap<Long, Account>();
 	}
@@ -88,6 +97,7 @@ public class Bank {
 				generator.writeObject(bank.accounts.get(a));
 			}
 			generator.writeEndArray();
+			generator.writeNumberField("last_wring", bank.wringTime);
 			generator.writeEndObject();
 		}
 
@@ -114,6 +124,7 @@ public class Bank {
 			for(Account a : mapper.treeToValue(node.get("accounts"), Account[].class)) {
 				bank.accounts.put(a.id, a);
 			}
+			bank.wringTime = mapper.treeToValue(node.get("last_wring"), long.class);
 			return bank;
 		}
 		

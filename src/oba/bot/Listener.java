@@ -56,6 +56,14 @@ public class Listener extends ListenerAdapter {
 				bank.save(new File(bankFile));
 				Application.log("Saved data.");
 			}
+			if(contentRaw.equals(">wring")) {
+				int hours = (int) ((System.currentTimeMillis()-bank.getWringTime())/(1000*60*60));
+				bank.resetWring();
+				int amount = hours*hours;
+				bank.change(authorId, amount);
+				channel.sendMessage("It has been "+hours+" hours since the last wring.\n"+author.getAsMention()+" has wrung "+amount+" Chrona.").queue();
+				Application.log(author.getName()+" wrings "+amount+" Chrona.");
+			}
 		}
 		if(channel.getId().contentEquals(fedChannel)) {
 			String contentRaw = e.getMessage().getContentRaw();
