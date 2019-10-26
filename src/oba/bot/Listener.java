@@ -59,7 +59,7 @@ public class Listener extends ListenerAdapter {
 		}
 		if(channel.getId().contentEquals(fedChannel)) {
 			String contentRaw = e.getMessage().getContentRaw();
-			if(contentRaw.matches("^>reward .+ \\d+")) {
+			if(contentRaw.matches("^>reward .+ -?\\d+")) {
 				String[] line = contentRaw.split(" ",4);
 				List<User> usersByName = discord.getUsersByName(line[1], true);
 				if(usersByName.size()>0) {
