@@ -59,6 +59,7 @@ public class Listener extends ListenerAdapter {
 			}
 			if(contentRaw.equals(">save")) {
 				bank.save(new File((String) Application.getProperties().get("bank_file")));
+				Application.log("Saved data.");
 			}
 		}
 	}
