@@ -1,5 +1,6 @@
 package oba.bot;
 
+import java.io.File;
 import java.util.List;
 
 import net.dv8tion.jda.api.JDA;
@@ -10,9 +11,12 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import oba.money.Bank;
 
 public class Listener extends ListenerAdapter {
+	
+	public static final long IMAGE_CYCLE = 1000;
 
 	JDA discord = Application.getDiscord();
 	Bank bank = Application.getBank();
+	long lastImage = System.currentTimeMillis();
 	
 	@Override
 	public void onMessageReceived(MessageReceivedEvent e) {
@@ -56,6 +60,10 @@ public class Listener extends ListenerAdapter {
 					channel.sendMessage(author.getAsMention()+" has already claimed a reward in the last 24 hours!").queue();
 				}
 			}
+		}
+		else if(e.getMessage().getContentRaw().matches("^[hH][aA][iI][lL][.!]+")&&System.currentTimeMillis()-lastImage>IMAGE_CYCLE) {
+			e.getChannel().sendFile(new File("hail.jpg")).queue();;
+			lastImage = System.currentTimeMillis();
 		}
 	}
 }
