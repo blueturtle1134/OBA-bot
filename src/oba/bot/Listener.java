@@ -11,9 +11,12 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import oba.money.Bank;
 
 public class Listener extends ListenerAdapter {
+	
+	public static final long IMAGE_CYCLE = 1000;
 
 	JDA discord = Application.getDiscord();
 	Bank bank = Application.getBank();
+	long lastImage = System.currentTimeMillis();
 	String bankChannel = (String) Application.getProperties().get("bank_channel");
 	String fedChannel = (String) Application.getProperties().get("fed_channel");
 	String bankFile = (String) Application.getProperties().get("bank_file");
@@ -94,6 +97,10 @@ public class Listener extends ListenerAdapter {
 		}
 		else {
 			channel.sendMessage(author.getAsMention()+", you do not have enough Chrona to send!").queue();
+		}
+		else if(e.getMessage().getContentRaw().matches("^[hH][aA][iI][lL][.!]+")&&System.currentTimeMillis()-lastImage>IMAGE_CYCLE) {
+			e.getChannel().sendFile(new File("hail.jpg")).queue();;
+			lastImage = System.currentTimeMillis();
 		}
 	}
 }
