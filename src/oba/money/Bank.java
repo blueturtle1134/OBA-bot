@@ -8,6 +8,7 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,6 +27,7 @@ public class Bank {
 
 	private Map<Long, Account> accounts;
 	private long wringTime;
+	private Map<String, Long> aliases;
 	
 	public long getWringTime() {
 		return wringTime;
@@ -67,6 +69,18 @@ public class Bank {
 		account.setBalance(account.getBalance()+delta);
 	}
 	
+	public boolean addAlias(String alias, long account) {
+		if(!aliases.containsKey(alias)&&accounts.containsKey(account)) {
+			aliases.put(alias, account);
+			return true;
+		}
+		return false;
+	}
+	
+	public Account getAccount(String alias) {
+		return accounts.get(aliases.get(alias));
+	}
+	
 	public void save(File saveFile) {
 		ObjectMapper mapper = new ObjectMapper();
 		try {
@@ -98,6 +112,7 @@ public class Bank {
 			}
 			generator.writeEndArray();
 			generator.writeNumberField("last_wring", bank.wringTime);
+			generator.writeObjectField("aliases", bank.aliases);
 			generator.writeEndObject();
 		}
 
@@ -115,6 +130,7 @@ public class Bank {
 			super(vc);
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public Bank deserialize(JsonParser parser, DeserializationContext context)
 				throws IOException, JsonProcessingException {
@@ -125,6 +141,8 @@ public class Bank {
 				bank.accounts.put(a.id, a);
 			}
 			bank.wringTime = mapper.treeToValue(node.get("last_wring"), long.class);
+			bank.aliases = new HashMap<String, Long>();
+			bank.aliases = mapper.treeToValue(node.get("aliases"), bank.aliases.getClass());
 			return bank;
 		}
 		

@@ -72,6 +72,9 @@ public class Application {
 		
 		//Say hello
 		log("Bot initialized.");
+		
+		//Save for changing versions and stuff
+		bank.save(new File((String) properties.get("bank_file")));
 	}
 
 	public static void log(String s) {

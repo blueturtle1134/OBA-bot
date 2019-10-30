@@ -8,12 +8,14 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import oba.money.Account;
 import oba.money.Bank;
 
 public class Listener extends ListenerAdapter {
 	
 	public static final long IMAGE_CYCLE = 1000;
 
+	private static final String NOT_RECOGNIZED_MESSAGE = "Name not recognized. Use the username without an @ or # and ID. Nicknames don't work yet.";
 	JDA discord = Application.getDiscord();
 	Bank bank = Application.getBank();
 	long lastImage = System.currentTimeMillis();
@@ -28,16 +30,16 @@ public class Listener extends ListenerAdapter {
 			String contentRaw = e.getMessage().getContentRaw();
 			User author = e.getAuthor();
 			long authorId = author.getIdLong();
-			if(contentRaw.matches("^>transfer .+ \\d+")) {
-				String[] line = contentRaw.split(" ",4);
-				List<User> usersByName = discord.getUsersByName(line[1], true);
-				if(usersByName.size()>0) {
-					long dest = usersByName.get(0).getIdLong();
-					int amount = Integer.parseInt(line[2]);
+			if(contentRaw.matches("^>transfer \\d+ .+")) {
+				String[] line = contentRaw.split(" ",3);
+				User user = identifyUser(line[2]);
+				if(user!=null) {
+					long dest = user.getIdLong();
+					int amount = Integer.parseInt(line[1]);
 					transfer(channel, author, dest, amount);
 				}
 				else {
-					channel.sendMessage("Name not recognized. Use the username without an @ or # and ID. Nicknames don't work yet.").queue();
+					channel.sendMessage(NOT_RECOGNIZED_MESSAGE).queue();
 				}
 			}
 			if(contentRaw.equals(">balance")) {
@@ -70,21 +72,62 @@ public class Listener extends ListenerAdapter {
 		}
 		if(channel.getId().contentEquals(fedChannel)) {
 			String contentRaw = e.getMessage().getContentRaw();
-			if(contentRaw.matches("^>reward .+ -?\\d+")) {
-				String[] line = contentRaw.split(" ",4);
-				List<User> usersByName = discord.getUsersByName(line[1], true);
-				if(usersByName.size()>0) {
-					long dest = usersByName.get(0).getIdLong();
-					int amount = Integer.parseInt(line[2]);
-					bank.change(dest, amount);
-					channel.sendMessage(amount+" Chrona delivered to "+discord.getUserById(dest).getAsMention()).queue();
-					Application.log(amount+" Chrona rewarded to "+discord.getUserById(dest).getName());
+			if(contentRaw.matches("^>reward -?\\d+ .+")) {
+				String[] line = contentRaw.split(" ",3);
+				User user = identifyUser(line[2]);
+				if(user!=null) {
+					reward(channel, Integer.parseInt(line[1]), user);
 				}
 				else {
-					channel.sendMessage("Name not recognized. Use the username without an @ or # and ID. Nicknames don't work yet.").queue();
+					channel.sendMessage(NOT_RECOGNIZED_MESSAGE).queue();
+				}
+			}
+			if(contentRaw.matches("^>alias .+ .+")) {
+				String[] line = contentRaw.split(" ",3);
+				User user = identifyUser(line[2]);
+				if(user!=null) {
+					if(bank.addAlias(line[1], user.getIdLong())) {
+						channel.sendMessage("Using "+line[1]+" will now refer to "+user.getAsMention()).queue();
+						Application.log("Alias added: "+line[1]+" to "+user.getName());
+					}
+					else {
+						channel.sendMessage("Alias already taken.").queue();
+					}
+				}
+				else {
+					channel.sendMessage(NOT_RECOGNIZED_MESSAGE).queue();
 				}
 			}
 		}
+	}
+	
+	private User identifyUser(String string) {
+		List<User> usersByName = discord.getUsersByName(string, true);
+		if(usersByName.size()>0) {
+			return usersByName.get(0);
+		}
+		else {
+			Account alias = bank.getAccount(string);
+			if(alias==null) {
+				return null;
+			}
+			else {
+				usersByName = discord.getUsersByName(alias.getName(), true);
+				if(usersByName.size()>0) {
+					return usersByName.get(0);
+				}
+				else {
+					return null;
+				}
+			}
+		}
+	}
+
+	private void reward(MessageChannel channel, int amount, User user) {
+		long dest = user.getIdLong();
+		bank.change(dest, amount);
+		channel.sendMessage(amount+" Chrona delivered to "+discord.getUserById(dest).getAsMention()).queue();
+		Application.log(amount+" Chrona rewarded to "+discord.getUserById(dest).getName());
 	}
 
 	private void transfer(MessageChannel channel, User author, long dest, int amount) {
