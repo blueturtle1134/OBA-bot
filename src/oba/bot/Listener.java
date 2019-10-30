@@ -99,6 +99,10 @@ public class Listener extends ListenerAdapter {
 				}
 			}
 		}
+		else if(e.getMessage().getContentRaw().matches("^[hH][aA][iI][lL][.!]+")&&System.currentTimeMillis()-lastImage>IMAGE_CYCLE) {
+			e.getChannel().sendFile(new File("hail.jpg")).queue();
+			lastImage = System.currentTimeMillis();
+		}
 	}
 	
 	private User identifyUser(String string) {
@@ -140,10 +144,6 @@ public class Listener extends ListenerAdapter {
 		}
 		else {
 			channel.sendMessage(author.getAsMention()+", you do not have enough Chrona to send!").queue();
-		}
-		else if(e.getMessage().getContentRaw().matches("^[hH][aA][iI][lL][.!]+")&&System.currentTimeMillis()-lastImage>IMAGE_CYCLE) {
-			e.getChannel().sendFile(new File("hail.jpg")).queue();;
-			lastImage = System.currentTimeMillis();
 		}
 	}
 }
