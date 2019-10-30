@@ -69,7 +69,7 @@ public class Listener extends ListenerAdapter {
 		}
 		if(channel.getId().contentEquals(fedChannel)) {
 			String contentRaw = e.getMessage().getContentRaw();
-			if(contentRaw.matches("^>reward -?\\d+ .+ ")) {
+			if(contentRaw.matches("^>reward -?\\d+ .+")) {
 				String[] line = contentRaw.split(" ",3);
 				User user = identifyUser(line[2]);
 				if(user!=null) {
