@@ -66,8 +66,14 @@ public class Listener extends ListenerAdapter {
 				int minutes = (int) ((System.currentTimeMillis()-bank.getWringTime())/(1000*60));
 				bank.resetWring();
 				int amount = Wring.wringAmount(minutes);
+				if(amount>0) {
+					channel.sendMessage("It has been **"+Wring.minutesToString(minutes)+"** since the last wring.\n"+author.getAsMention()+" has wrung **"+amount+"** Chrona.").queue();
+				}
+				else {
+					channel.sendMessage("It has been **"+Wring.minutesToString(minutes)+"** since the last wring.\n"+author.getAsMention()+" has **lost one Chrona** for being impatient.").queue();
+					amount = -1;
+				}
 				bank.change(authorId, amount);
-				channel.sendMessage("It has been **"+Wring.minutesToString(minutes)+"** since the last wring.\n"+author.getAsMention()+" has wrung **"+amount+"** Chrona.").queue();
 				Application.log(author.getName()+" wrings "+amount+" Chrona.");
 			}
 		}
