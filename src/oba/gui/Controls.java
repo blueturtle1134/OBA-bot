@@ -7,6 +7,8 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import oba.bot.Application;
+
 public class Controls {
 	
 	JFrame frame;
@@ -20,12 +22,12 @@ public class Controls {
 		mainPanel = new JPanel();
 		frame.setContentPane(mainPanel);
 		
-		JButton closeButton = new JButton("Save and close");
+		JButton closeButton = new JButton("Save");
 		closeButton.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				
+				Application.save();
 			}
 			
 		});
