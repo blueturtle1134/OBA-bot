@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import oba.money.Account;
 import oba.money.Bank;
+import oba.money.Wring;
 
 public class Listener extends ListenerAdapter {
 	
@@ -62,11 +63,17 @@ public class Listener extends ListenerAdapter {
 				Application.log("Saved data.");
 			}
 			if(contentRaw.equals(">wring")) {
-				int hours = (int) ((System.currentTimeMillis()-bank.getWringTime())/(1000*60*60));
+				int minutes = (int) ((System.currentTimeMillis()-bank.getWringTime())/(1000*60));
 				bank.resetWring();
-				int amount = hours*hours;
+				int amount = Wring.wringAmount(minutes);
+				if(amount>0) {
+					channel.sendMessage("It has been **"+Wring.minutesToString(minutes)+"** since the last wring.\n"+author.getAsMention()+" has wrung **"+amount+"** Chrona.").queue();
+				}
+				else {
+					channel.sendMessage("It has been **"+Wring.minutesToString(minutes)+"** since the last wring.\n"+author.getAsMention()+" has **lost one Chrona** for being impatient.").queue();
+					amount = -1;
+				}
 				bank.change(authorId, amount);
-				channel.sendMessage("It has been "+hours+" hours since the last wring.\n"+author.getAsMention()+" has wrung "+amount+" Chrona.").queue();
 				Application.log(author.getName()+" wrings "+amount+" Chrona.");
 			}
 		}
