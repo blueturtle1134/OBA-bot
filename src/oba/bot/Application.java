@@ -83,7 +83,7 @@ public class Application {
 		discord.addEventListener(new Listener());
 		
 		//Say hello
-		log("Bot initialized.");
+		log("Initializing OBA Bot version "+getVersion());
 		
 		//Save for changing versions and stuff
 		save();
@@ -129,6 +129,6 @@ public class Application {
 	}
 
 	public static String getVersion() {
-		return "0.1";
+		return "0.1.1";
 	}
 }
