@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.TextChannel;
+import oba.gui.Controls;
 import oba.money.Bank;
 
 public class Application {
@@ -21,6 +22,7 @@ public class Application {
 	private static JDA discord;
 	private static TextChannel log;
 	private static Bank bank;
+	private static Controls controls;
 
 	public static void main(String[] args) {
 		
@@ -67,6 +69,9 @@ public class Application {
 			e.printStackTrace();
 		}
 		
+		//Start the panel
+		controls = new Controls();
+		
 		//Start listener
 		discord.addEventListener(new Listener());
 		
@@ -94,6 +99,7 @@ public class Application {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		controls.print(s);
 	}
 	
 	public static JDA getDiscord() {
