@@ -2,7 +2,6 @@ package oba.gui;
 
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -30,11 +29,11 @@ public class Controls {
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 		frame.setContentPane(mainPanel);
 		
-		JLabel title = new JLabel("OBA Bot Controls");
+		JLabel title = new JLabel("OBA Bot version "+Application.getVersion());
 		title.setFont(new Font("Console", Font.BOLD, 30));
-//		title.setAlignmentX(0.0f);
-//		title.setHorizontalAlignment(SwingConstants.CENTER);
-//		title.setMinimumSize(new Dimension(400,30));
+		title.setHorizontalAlignment(SwingConstants.CENTER);
+		title.setPreferredSize(new Dimension(500,50));
+		title.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
 		mainPanel.add(title);
 		
 		JButton saveButton = new JButton("Save");
@@ -46,15 +45,26 @@ public class Controls {
 			}
 			
 		});
-//		saveButton.setMinimumSize(null);
-//		saveButton.setMaximumSize(null);
-//		saveButton.setPreferredSize(null);
-//		saveButton.setAlignmentX(0.0f);
+		saveButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
 		mainPanel.add(saveButton);
+		
+		JButton exitButton = new JButton("Save and Stop Bot");
+		exitButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				Application.save();
+				Application.stop();
+			}
+			
+		});
+		exitButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
+		mainPanel.add(exitButton);
 		
 		output = new JTextArea();
 		output.setEditable(false);
-//		output.setMinimumSize(new Dimension(400,40));
+		output.setAlignmentX(0.0f);
+		output.setText("No logs yet...");
 		mainPanel.add(output);
 		
 		frame.pack();
@@ -62,6 +72,6 @@ public class Controls {
 	}
 	
 	public void print(String s) {
-		output.setText(s);
+		output.setText("Last log: "+s);
 	}
 }

@@ -107,4 +107,13 @@ public class Application {
 	public static Bank getBank() {
 		return bank;
 	}
+
+	public static void stop() {
+		log("Stopping bot.");
+		System.exit(0);
+	}
+
+	public static String getVersion() {
+		return "0.1";
+	}
 }
