@@ -59,8 +59,7 @@ public class Listener extends ListenerAdapter {
 				}
 			}
 			if(contentRaw.equals(">save")) {
-				bank.save(new File(bankFile));
-				Application.log("Saved data.");
+				Application.save();
 			}
 			if(contentRaw.equals(">wring")) {
 				int minutes = (int) ((System.currentTimeMillis()-bank.getWringTime())/(1000*60));
@@ -84,6 +83,7 @@ public class Listener extends ListenerAdapter {
 				User user = identifyUser(line[2]);
 				if(user!=null) {
 					reward(channel, Integer.parseInt(line[1]), user);
+					Application.log(e.getAuthor().getName()+" rewards "+line[1]+" Chrona to "+user.getName());
 				}
 				else {
 					channel.sendMessage(NOT_RECOGNIZED_MESSAGE).queue();

@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.TextChannel;
+import oba.gui.Controls;
 import oba.money.Bank;
 
 public class Application {
@@ -24,12 +25,12 @@ public class Application {
 	private static JDA discord;
 	private static TextChannel log;
 	private static Bank bank;
-	
+	private static Controls controls;
 	private static final DateFormat timestampFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
 	static {
 		timestampFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 	}
-	
+  
 	public static void main(String[] args) {
 		
 		//Read the properties
@@ -75,6 +76,9 @@ public class Application {
 			e.printStackTrace();
 		}
 		
+		//Start the panel
+		controls = new Controls();
+		
 		//Start listener
 		discord.addEventListener(new Listener());
 		
@@ -82,7 +86,12 @@ public class Application {
 		log("Bot initialized.");
 		
 		//Save for changing versions and stuff
+		save();
+	}
+
+	public static void save() {
 		bank.save(new File((String) properties.get("bank_file")));
+		log("Data saved.");
 	}
 
 	public static void log(String s) {
@@ -99,6 +108,7 @@ public class Application {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		controls.print(s);
 	}
 	
 	public static JDA getDiscord() {
@@ -111,5 +121,14 @@ public class Application {
 	
 	public static Bank getBank() {
 		return bank;
+	}
+
+	public static void stop() {
+		log("Stopping bot.");
+		System.exit(0);
+	}
+
+	public static String getVersion() {
+		return "0.1";
 	}
 }
