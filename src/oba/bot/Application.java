@@ -4,7 +4,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Date;
+import java.text.DateFormat;
 import java.util.Properties;
+import java.util.TimeZone;
 
 import javax.security.auth.login.LoginException;
 
@@ -21,7 +24,12 @@ public class Application {
 	private static JDA discord;
 	private static TextChannel log;
 	private static Bank bank;
-
+	
+	private static final DateFormat timestampFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
+	static {
+		timestampFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+	}
+	
 	public static void main(String[] args) {
 		
 		//Read the properties
@@ -78,6 +86,8 @@ public class Application {
 	}
 
 	public static void log(String s) {
+		Date now = new Date();
+		s = "["+timestampFormat.format(now)+"] "+s;
 		System.out.println(s);
 		log.sendMessage(s).queue();
 		FileWriter output;
