@@ -27,3 +27,5 @@ config.txt
 bank.txt
 log.txt
 bank.json
+src/Test.java
+sudoku.json
