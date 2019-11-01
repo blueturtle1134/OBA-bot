@@ -1,4 +1,4 @@
-package oba.bot;
+package oba.bank.bot;
 
 import java.io.File;
 import java.io.FileReader;
@@ -16,11 +16,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.TextChannel;
-import oba.gui.Controls;
-import oba.money.Bank;
+import oba.bank.gui.Controls;
+import oba.bank.money.Bank;
 import oba.war.sudoku.SudokuListener;
 
-public class Application {
+public class BankApplication {
 	
 	private static Properties properties;
 	private static JDA discord;
@@ -33,7 +33,10 @@ public class Application {
 	}
   
 	public static void main(String[] args) {
-		
+		start(false);
+	}
+
+	public static void start(boolean gui) {
 		//Read the properties
 
 		properties = new Properties();
@@ -77,16 +80,14 @@ public class Application {
 			e.printStackTrace();
 		}
 		
-		//Start the panel
-		controls = new Controls();
+		
+		if(gui){
+			//Start the panel
+			controls = new Controls();
+		}
 		
 		//Start listener
 		discord.addEventListener(new Listener());
-		
-		//Start Sudoku listener
-		SudokuListener sudoku = new SudokuListener(discord.getTextChannelById((String) properties.get("slow_channel")));
-		sudoku.readState(new File((String) properties.get("sudoku_file")));
-		discord.addEventListener(sudoku);
 		
 		//Say hello
 		log("Initializing OBA Bot version "+getVersion());
