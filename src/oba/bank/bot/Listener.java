@@ -1,4 +1,4 @@
-package oba.bot;
+package oba.bank.bot;
 
 import java.io.File;
 import java.util.List;
@@ -8,21 +8,21 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import oba.money.Account;
-import oba.money.Bank;
-import oba.money.Wring;
+import oba.bank.money.Account;
+import oba.bank.money.Bank;
+import oba.bank.money.Wring;
 
 public class Listener extends ListenerAdapter {
 	
 	public static final long IMAGE_CYCLE = 1000;
 
 	private static final String NOT_RECOGNIZED_MESSAGE = "Name not recognized. Use the username without an @ or # and ID. Nicknames don't work yet.";
-	JDA discord = Application.getDiscord();
-	Bank bank = Application.getBank();
+	JDA discord = BankApplication.getDiscord();
+	Bank bank = BankApplication.getBank();
 	long lastImage = System.currentTimeMillis();
-	String bankChannel = (String) Application.getProperties().get("bank_channel");
-	String fedChannel = (String) Application.getProperties().get("fed_channel");
-	String bankFile = (String) Application.getProperties().get("bank_file");
+	String bankChannel = (String) BankApplication.getProperties().get("bank_channel");
+	String fedChannel = (String) BankApplication.getProperties().get("fed_channel");
+	String bankFile = (String) BankApplication.getProperties().get("bank_file");
 	
 	@Override
 	public void onMessageReceived(MessageReceivedEvent e) {
@@ -51,7 +51,7 @@ public class Listener extends ListenerAdapter {
 					int dailyReward = 5 + (int)(Math.random()*4);
 					bank.change(authorId, dailyReward);
 					channel.sendMessage(author.getAsMention()+" claims a daily reward of "+dailyReward+" Chrona.").queue();
-					Application.log(author.getName()+" claims a daily reward of "+dailyReward+" Chrona.");
+					BankApplication.log(author.getName()+" claims a daily reward of "+dailyReward+" Chrona.");
 					bank.getAccount(authorId).resetDaily();
 				}
 				else {
@@ -59,7 +59,7 @@ public class Listener extends ListenerAdapter {
 				}
 			}
 			if(contentRaw.equals(">save")) {
-				Application.save();
+				BankApplication.save();
 			}
 			if(contentRaw.equals(">wring")) {
 				int minutes = (int) ((System.currentTimeMillis()-bank.getWringTime())/(1000*60));
@@ -73,7 +73,7 @@ public class Listener extends ListenerAdapter {
 					amount = -1;
 				}
 				bank.change(authorId, amount);
-				Application.log(author.getName()+" wrings "+amount+" Chrona.");
+				BankApplication.log(author.getName()+" wrings "+amount+" Chrona.");
 			}
 		}
 		if(channel.getId().contentEquals(fedChannel)) {
@@ -83,7 +83,7 @@ public class Listener extends ListenerAdapter {
 				User user = identifyUser(line[2]);
 				if(user!=null) {
 					reward(channel, Integer.parseInt(line[1]), user);
-					Application.log(e.getAuthor().getName()+" rewards "+line[1]+" Chrona to "+user.getName());
+					BankApplication.log(e.getAuthor().getName()+" rewards "+line[1]+" Chrona to "+user.getName());
 				}
 				else {
 					channel.sendMessage(NOT_RECOGNIZED_MESSAGE).queue();
@@ -95,7 +95,7 @@ public class Listener extends ListenerAdapter {
 				if(user!=null) {
 					if(bank.addAlias(line[1], user.getIdLong())) {
 						channel.sendMessage("Using "+line[1]+" will now refer to "+user.getAsMention()).queue();
-						Application.log("Alias added: "+line[1]+" to "+user.getName());
+						BankApplication.log("Alias added: "+line[1]+" to "+user.getName());
 					}
 					else {
 						channel.sendMessage("Alias already taken.").queue();
@@ -138,7 +138,7 @@ public class Listener extends ListenerAdapter {
 		long dest = user.getIdLong();
 		bank.change(dest, amount);
 		channel.sendMessage(amount+" Chrona delivered to "+discord.getUserById(dest).getAsMention()).queue();
-		Application.log(amount+" Chrona rewarded to "+discord.getUserById(dest).getName());
+		BankApplication.log(amount+" Chrona rewarded to "+discord.getUserById(dest).getName());
 	}
 
 	private void transfer(MessageChannel channel, User author, long dest, int amount) {
@@ -146,7 +146,7 @@ public class Listener extends ListenerAdapter {
 		if(bank.getBalance(authorId)>amount) {
 			bank.change(authorId, -1*amount);
 			bank.change(dest, amount);
-			Application.log("Transferred "+amount+" Chrona from "+bank.getAccount(authorId).getName()+" to "+bank.getAccount(dest).getName());
+			BankApplication.log("Transferred "+amount+" Chrona from "+bank.getAccount(authorId).getName()+" to "+bank.getAccount(dest).getName());
 			channel.sendMessage(amount+" Chrona delivered to "+discord.getUserById(dest).getAsMention()).queue();
 		}
 		else {

@@ -1,0 +1,3 @@
+token=NjM5OTcyMjY4MTcyMTE2MDI3.XbzCwA.uIvjA7ezcrViuO9Khjx0ROHs_SM
+sudoku_file=sudoku.json
+slow_channel=626926690706128897

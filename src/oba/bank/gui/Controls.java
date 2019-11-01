@@ -1,4 +1,4 @@
-package oba.gui;
+package oba.bank.gui;
 
 import java.awt.Dimension;
 import java.awt.Font;
@@ -13,7 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 
-import oba.bot.Application;
+import oba.bank.bot.BankApplication;
 
 public class Controls {
 	
@@ -29,7 +29,7 @@ public class Controls {
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 		frame.setContentPane(mainPanel);
 		
-		JLabel title = new JLabel("OBA Bot version "+Application.getVersion());
+		JLabel title = new JLabel("OBA Bot version "+BankApplication.getVersion());
 		title.setFont(new Font("Console", Font.BOLD, 30));
 		title.setHorizontalAlignment(SwingConstants.CENTER);
 		title.setPreferredSize(new Dimension(500,50));
@@ -41,7 +41,7 @@ public class Controls {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				Application.save();
+				BankApplication.save();
 			}
 			
 		});
@@ -53,8 +53,8 @@ public class Controls {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				Application.save();
-				Application.stop();
+				BankApplication.save();
+				BankApplication.stop();
 			}
 			
 		});

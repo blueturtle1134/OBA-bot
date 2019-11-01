@@ -1,4 +1,4 @@
-package oba.money;
+package oba.bank.money;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import net.dv8tion.jda.api.entities.User;
-import oba.bot.Application;
+import oba.bank.bot.BankApplication;
 
 @JsonSerialize(using = Bank.BankSerializer.class)
 @JsonDeserialize(using = Bank.BankDeserializer.class)
@@ -42,14 +42,14 @@ public class Bank {
 	
 	public Account getAccount(long id) {
 		if(!accounts.containsKey(id)) {
-			open(Application.getDiscord().getUserById(id));
+			open(BankApplication.getDiscord().getUserById(id));
 		}
 		return accounts.get(id);
 	}
 	
 	public int getBalance(long id) {
 		if(!accounts.containsKey(id)) {
-			open(Application.getDiscord().getUserById(id));
+			open(BankApplication.getDiscord().getUserById(id));
 		}
 		return accounts.get(id).getBalance();
 	}
@@ -57,12 +57,12 @@ public class Bank {
 	public void open(User user) {
 		Account newAccount = new Account(user.getIdLong(), user.getName());
 		accounts.put(user.getIdLong(), newAccount);
-		Application.log("Created new account for "+newAccount.getName()+" ("+user.getIdLong()+")");
+		BankApplication.log("Created new account for "+newAccount.getName()+" ("+user.getIdLong()+")");
 	}
 	
 	public void change(long id, int delta) {
 		if(!accounts.containsKey(id)) {
-			open(Application.getDiscord().getUserById(id));
+			open(BankApplication.getDiscord().getUserById(id));
 		}
 		Account account = accounts.get(id);
 		account.setBalance(account.getBalance()+delta);

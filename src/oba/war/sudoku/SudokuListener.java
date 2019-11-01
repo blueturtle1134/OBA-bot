@@ -8,7 +8,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import oba.bot.Application;
+import oba.bank.bot.BankApplication;
+import oba.war.bot.WarApplication;
 
 public class SudokuListener extends ListenerAdapter {
 	
@@ -30,14 +31,13 @@ public class SudokuListener extends ListenerAdapter {
 			int y = Integer.parseInt(strung[1]);
 			int v = Integer.parseInt(strung[2]);
 			if(x>0&&y>0&&v>0) {
-				if(state.addValue(x, y, v)) {
-					Application.log(e.getAuthor().getName()+" places "+v+" at ("+x+", "+y+")");
+				if(state.addValue(x-1, y-1, v)) {
 					channel.sendMessage("Placed!").queue();
 					if(state.filled()) {
 						channel.sendMessage("This board is done! "+e.getAuthor().getAsMention()+" wins one point!").queue();;
 						this.state = SudokuState.getBlankState();
 					}
-					saveState(new File((String) Application.getProperties().get("sudoku_file")));
+					saveState(new File((String) WarApplication.getProperties().get("sudoku_file")));
 				}
 				else {
 					channel.sendMessage("Invalid location!").queue();

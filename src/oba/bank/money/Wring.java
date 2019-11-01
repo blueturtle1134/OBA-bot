@@ -1,4 +1,4 @@
-package oba.money;
+package oba.bank.money;
 
 public class Wring {
 
