@@ -14,12 +14,15 @@ import oba.money.Wring;
 
 public class Listener extends ListenerAdapter {
 	
+	private static final int PASSOVER_LIMIT = 30;
 	public static final long IMAGE_CYCLE = 1000;
+	public static final long PASSOVER_CYCLE = 20*60*1000;
 
 	private static final String NOT_RECOGNIZED_MESSAGE = "Name not recognized. Use the username without an @ or # and ID. Nicknames don't work yet.";
 	JDA discord = Application.getDiscord();
 	Bank bank = Application.getBank();
 	long lastImage = System.currentTimeMillis();
+	long lastPassover = System.currentTimeMillis();
 	String bankChannel = (String) Application.getProperties().get("bank_channel");
 	String fedChannel = (String) Application.getProperties().get("fed_channel");
 	String bankFile = (String) Application.getProperties().get("bank_file");
@@ -27,8 +30,8 @@ public class Listener extends ListenerAdapter {
 	@Override
 	public void onMessageReceived(MessageReceivedEvent e) {
 		MessageChannel channel = e.getChannel();
+		String contentRaw = e.getMessage().getContentRaw();
 		if(channel.getId().equals(bankChannel)) {
-			String contentRaw = e.getMessage().getContentRaw();
 			User author = e.getAuthor();
 			long authorId = author.getIdLong();
 			if(contentRaw.matches("^>transfer \\d+ .+")) {
@@ -77,7 +80,6 @@ public class Listener extends ListenerAdapter {
 			}
 		}
 		if(channel.getId().contentEquals(fedChannel)) {
-			String contentRaw = e.getMessage().getContentRaw();
 			if(contentRaw.matches("^>reward -?\\d+ .+")) {
 				String[] line = contentRaw.split(" ",3);
 				User user = identifyUser(line[2]);
@@ -106,9 +108,12 @@ public class Listener extends ListenerAdapter {
 				}
 			}
 		}
-		else if(e.getMessage().getContentRaw().matches("^[hH][aA][iI][lL].+!+")&&System.currentTimeMillis()-lastImage>IMAGE_CYCLE) {
+		else if(contentRaw.matches("^[hH][aA][iI][lL].+!+")&&System.currentTimeMillis()-lastImage>IMAGE_CYCLE) {
 			e.getChannel().sendFile(new File("hail.jpg")).queue();
 			lastImage = System.currentTimeMillis();
+		}
+		else if(contentRaw.contains("Christmas")&&System.currentTimeMillis()-lastPassover>PASSOVER_CYCLE&&contentRaw.length()>PASSOVER_LIMIT) {
+			e.getChannel().sendMessage("> "+contentRaw.replace("Christmas", "Passover")+"\nftfy").queue();
 		}
 	}
 	
