@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Date;
 import java.text.DateFormat;
+import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
 
@@ -18,6 +18,7 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.TextChannel;
 import oba.gui.Controls;
 import oba.money.Bank;
+import oba.war.sudoku.SudokuListener;
 
 public class Application {
 	
@@ -81,6 +82,11 @@ public class Application {
 		
 		//Start listener
 		discord.addEventListener(new Listener());
+		
+		//Start Sudoku listener
+		SudokuListener sudoku = new SudokuListener(discord.getTextChannelById((String) properties.get("slow_channel")));
+		sudoku.readState(new File((String) properties.get("sudoku_file")));
+		discord.addEventListener(sudoku);
 		
 		//Say hello
 		log("Initializing OBA Bot version "+getVersion());
