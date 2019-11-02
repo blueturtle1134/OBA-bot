@@ -29,6 +29,8 @@ public class WarApplication {
 			//Read all data
 			FileReader configFile = new FileReader("war_config.txt");
 			properties.load(configFile);
+			FileReader tokenFile = new FileReader("tokens.txt");
+			properties.load(tokenFile);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -37,7 +39,7 @@ public class WarApplication {
 		//Open up Discord
 
 		try {
-			discord = new JDABuilder((String) properties.get("token")).build().awaitReady();
+			discord = new JDABuilder((String) properties.get("war_token")).build().awaitReady();
 		} catch (LoginException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

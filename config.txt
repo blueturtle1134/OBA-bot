@@ -1,0 +1,5 @@
+log_channel=635338708727496716
+bank_channel=635338756697751552
+fed_channel=637460270058569729
+log_file=log.txt
+bank_file=bank.json
