@@ -1,0 +1,2 @@
+sudoku_file=sudoku.json
+slow_channel=626926690706128897

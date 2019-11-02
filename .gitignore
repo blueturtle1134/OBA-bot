@@ -23,7 +23,9 @@
 hs_err_pid*
 .classpath
 /bin/
-config.txt
 bank.txt
 log.txt
 bank.json
+src/Test.java
+sudoku.json
+tokens.txt
