@@ -15,10 +15,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import oba.bank.gui.Controls;
 import oba.bank.money.Bank;
-import oba.war.sudoku.SudokuListener;
 
 public class BankApplication {
 	
@@ -28,6 +28,7 @@ public class BankApplication {
 	private static Bank bank;
 	private static Controls controls;
 	private static final DateFormat timestampFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
+	private static Guild guild;
 	static {
 		timestampFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 	}
@@ -54,7 +55,7 @@ public class BankApplication {
 		//Open up Discord
 		
 		try {
-			discord = new JDABuilder((String) properties.get("bank_token")).build().awaitReady();
+			discord = new JDABuilder(properties.getProperty("bank_token")).build().awaitReady();
 		} catch (LoginException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -64,12 +65,12 @@ public class BankApplication {
 		}
 		
 		//Grab the log channel
-		log = discord.getTextChannelById((String) properties.get("log_channel"));
+		log = discord.getTextChannelById(properties.getProperty("log_channel"));
 		
 		//Make the bank
 		ObjectMapper mapper = new ObjectMapper();
 		try {
-			File file = new File((String) properties.get("bank_file"));
+			File file = new File(properties.getProperty("bank_file"));
 			if(file.exists()) {
 				bank = mapper.readValue(file, Bank.class);
 			}
@@ -94,12 +95,15 @@ public class BankApplication {
 		//Say hello
 		log("Initializing OBA Bot version "+getVersion());
 		
+		//Grab the server location
+		guild = discord.getGuildById(Integer.parseInt(properties.getProperty("server")));
+		
 		//Save for changing versions and stuff
 		save();
 	}
 
 	public static void save() {
-		bank.save(new File((String) properties.get("bank_file")));
+		bank.save(new File(properties.getProperty("bank_file")));
 		log("Data saved.");
 	}
 
@@ -110,7 +114,7 @@ public class BankApplication {
 		log.sendMessage(s).queue();
 		FileWriter output;
 		try {
-			output = new FileWriter((String) properties.get("log_file"), true);
+			output = new FileWriter(properties.getProperty("log_file"), true);
 			output.write("\n"+s);
 			output.close();
 		} catch (IOException e) {
@@ -139,5 +143,9 @@ public class BankApplication {
 
 	public static String getVersion() {
 		return "0.1.1";
+	}
+	
+	public static Guild getGuild() {
+		return guild;
 	}
 }

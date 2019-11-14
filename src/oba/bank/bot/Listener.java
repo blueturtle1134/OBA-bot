@@ -23,9 +23,9 @@ public class Listener extends ListenerAdapter {
 	Bank bank = BankApplication.getBank();
 	long lastImage = System.currentTimeMillis();
 	long lastPassover = System.currentTimeMillis();
-	String bankChannel = (String) BankApplication.getProperties().get("bank_channel");
-	String fedChannel = (String) BankApplication.getProperties().get("fed_channel");
-	String bankFile = (String) BankApplication.getProperties().get("bank_file");
+	String bankChannel = BankApplication.getProperties().getProperty("bank_channel");
+	String fedChannel = BankApplication.getProperties().getProperty("fed_channel");
+	String bankFile = BankApplication.getProperties().getProperty("bank_file");
 
 	@Override
 	public void onMessageReceived(MessageReceivedEvent e) {
