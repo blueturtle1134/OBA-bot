@@ -22,6 +22,7 @@ public class Listener extends ListenerAdapter {
 	JDA discord = BankApplication.getDiscord();
 	Bank bank = BankApplication.getBank();
 	long lastImage = System.currentTimeMillis();
+	long lastPassover = System.currentTimeMillis();
 	String bankChannel = (String) BankApplication.getProperties().get("bank_channel");
 	String fedChannel = (String) BankApplication.getProperties().get("fed_channel");
 	String bankFile = (String) BankApplication.getProperties().get("bank_file");
