@@ -1,6 +1,7 @@
 package oba.bank.bot;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -19,6 +20,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import oba.bank.gui.Controls;
 import oba.bank.money.Bank;
+import oba.bank.money.Rank;
 
 public class BankApplication {
 	
@@ -26,7 +28,7 @@ public class BankApplication {
 	private static JDA discord;
 	private static TextChannel log;
 	private static Bank bank;
-	private static Controls controls;
+	private static Controls controls = null;
 	private static final DateFormat timestampFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
 	private static Guild guild;
 	static {
@@ -96,7 +98,15 @@ public class BankApplication {
 		log("Initializing OBA Bot version "+getVersion());
 		
 		//Grab the server location
-		guild = discord.getGuildById(Integer.parseInt(properties.getProperty("server")));
+		guild = discord.getGuildById(Long.parseLong(properties.getProperty("server")));
+		
+		//Kick the ranks system
+		try {
+			Rank.readRanks(new File(properties.getProperty("rank_file")));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		//Save for changing versions and stuff
 		save();
@@ -121,7 +131,9 @@ public class BankApplication {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		controls.print(s);
+		if(controls!=null) {
+			controls.print(s);
+		}
 	}
 	
 	public static JDA getDiscord() {

@@ -63,9 +63,17 @@ public class Rank {
 		List<Role> memberRoles = member.getRoles();
 		for(int i = 0; i<ranks.length; i++) {
 			if(memberRoles.contains(ranks[i].role)) {
-				BankApplication.getGuild().removeRoleFromMember(member, ranks[i].role);
+				BankApplication.getGuild().removeRoleFromMember(member, ranks[i].role).queue();
 			}
 		}
-		BankApplication.getGuild().addRoleToMember(member, ranks[rankNumber].role);
+		BankApplication.getGuild().addRoleToMember(member, ranks[rankNumber].role).queue();
+	}
+	
+	public static Rank getRankByNumber(int i) {
+		return ranks[i];
+	}
+	
+	public static int rankCount() {
+		return ranks.length;
 	}
 }

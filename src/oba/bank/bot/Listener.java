@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import oba.bank.money.Account;
 import oba.bank.money.Bank;
+import oba.bank.money.Rank;
 import oba.bank.money.Wring;
 
 public class Listener extends ListenerAdapter {
@@ -29,6 +30,9 @@ public class Listener extends ListenerAdapter {
 
 	@Override
 	public void onMessageReceived(MessageReceivedEvent e) {
+		if(e.getAuthor().isBot()) {
+			return;
+		}
 		MessageChannel channel = e.getChannel();
 		String contentRaw = e.getMessage().getContentRaw();
 		if(channel.getId().equals(bankChannel)) {
@@ -77,6 +81,58 @@ public class Listener extends ListenerAdapter {
 				}
 				bank.change(authorId, amount);
 				BankApplication.log(author.getName()+" wrings "+amount+" Chrona.");
+			}
+			if(contentRaw.equals(">rank")) {
+				int rankNum = Rank.getRank(e.getMember());
+				if(rankNum < 0) {
+					channel.sendMessage(e.getAuthor().getAsMention()+", you don't have a rank role! Assigning the lowest rank to you now.").queue();
+					Rank.changeRank(e.getMember(), 0);
+				}
+				else {
+					Rank rank = Rank.getRankByNumber(rankNum);
+					String output = e.getAuthor().getAsMention()+", your current rank is "+rank.getName();
+					if(rankNum<Rank.rankCount()) {
+						Rank next = Rank.getRankByNumber(rankNum+1);
+						output += "\nThe next rank is **"+next.getName()+"** and costs **"+next.getCost()+"** Chrona.";
+						if(next.getCost()<=bank.getBalance(authorId)) {
+							output += "\nYou can buy this rank now! (Use `>rankup` to buy next rank)";
+						}
+						else {
+							output += "\nYou need **"+(next.getCost()-bank.getBalance(authorId))+"** more Chrona to buy this rank.";
+						}
+					}
+					else {
+						output += "\nThat's the last rank.";
+					}
+					channel.sendMessage(output).queue();
+				}
+			}
+			if(contentRaw.equals(">rankup")) {
+				int rankNum = Rank.getRank(e.getMember());
+				if(rankNum < 0) {
+					channel.sendMessage(e.getAuthor().getAsMention()+", you don't have a rank role! Assigning the lowest rank to you now.").queue();
+					Rank.changeRank(e.getMember(), 0);
+				}
+				else {
+					Rank rank = Rank.getRankByNumber(rankNum);
+					if(rankNum<Rank.rankCount()) {
+						Rank next = Rank.getRankByNumber(rankNum+1);
+						if(next.getCost()<=bank.getBalance(authorId)) {
+
+							channel.sendMessage(e.getAuthor().getAsMention()+", you have spent "+next.getCost()+" Chrona to buy the **"+next.getName()+"** rank.").queue();
+							Rank.changeRank(e.getMember(), rankNum+1);
+							bank.change(authorId, -1*next.getCost());
+							BankApplication.log(author.getName()+" purchases "+next.getName()+" rank.");
+						}
+						else {
+
+							channel.sendMessage(e.getAuthor().getAsMention()+", you need **"+(next.getCost()-bank.getBalance(authorId))+"** more Chrona to buy the next rank (**"+next.getName()+"**).").queue();
+						}
+					}
+					else {
+						channel.sendMessage(e.getAuthor().getAsMention()+" There are no more ranks to buy!").queue();
+					}
+				}
 			}
 		}
 		if(channel.getId().contentEquals(fedChannel)) {
