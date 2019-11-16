@@ -24,9 +24,11 @@ public class Listener extends ListenerAdapter {
 	Bank bank = BankApplication.getBank();
 	long lastImage = System.currentTimeMillis();
 	long lastPassover = System.currentTimeMillis();
+	long lastSave = System.currentTimeMillis();
 	String bankChannel = BankApplication.getProperties().getProperty("bank_channel");
 	String fedChannel = BankApplication.getProperties().getProperty("fed_channel");
 	String bankFile = BankApplication.getProperties().getProperty("bank_file");
+	long autosavePeriod = Long.parseLong(BankApplication.getProperties().getProperty("autosave_period"));
 
 	@Override
 	public void onMessageReceived(MessageReceivedEvent e) {
@@ -60,6 +62,7 @@ public class Listener extends ListenerAdapter {
 					channel.sendMessage(author.getAsMention()+" claims a daily reward of "+dailyReward+" Chrona.").queue();
 					BankApplication.log(author.getName()+" claims a daily reward of "+dailyReward+" Chrona.");
 					bank.getAccount(authorId).resetDaily();
+					autosave();
 				}
 				else {
 					channel.sendMessage(author.getAsMention()+" has already claimed a reward in the last 24 hours!").queue();
@@ -67,6 +70,7 @@ public class Listener extends ListenerAdapter {
 			}
 			if(contentRaw.equals(">save")) {
 				BankApplication.save();
+				lastSave = System.currentTimeMillis();
 			}
 			if(contentRaw.equals(">wring")) {
 				int minutes = (int) ((System.currentTimeMillis()-bank.getWringTime())/(1000*60));
@@ -80,6 +84,7 @@ public class Listener extends ListenerAdapter {
 					amount = -1;
 				}
 				bank.change(authorId, amount);
+				autosave();
 				BankApplication.log(author.getName()+" wrings "+amount+" Chrona.");
 			}
 			if(contentRaw.equals(">rank")) {
@@ -114,15 +119,14 @@ public class Listener extends ListenerAdapter {
 					Rank.changeRank(e.getMember(), 0);
 				}
 				else {
-					Rank rank = Rank.getRankByNumber(rankNum);
 					if(rankNum<Rank.rankCount()) {
 						Rank next = Rank.getRankByNumber(rankNum+1);
 						if(next.getCost()<=bank.getBalance(authorId)) {
-
 							channel.sendMessage(e.getAuthor().getAsMention()+", you have spent "+next.getCost()+" Chrona to buy the **"+next.getName()+"** rank.").queue();
 							Rank.changeRank(e.getMember(), rankNum+1);
 							bank.change(authorId, -1*next.getCost());
 							BankApplication.log(author.getName()+" purchases "+next.getName()+" rank.");
+							autosave();
 						}
 						else {
 
@@ -142,6 +146,7 @@ public class Listener extends ListenerAdapter {
 				if(user!=null) {
 					reward(channel, Integer.parseInt(line[1]), user);
 					BankApplication.log(e.getAuthor().getName()+" rewards "+line[1]+" Chrona to "+user.getName());
+					autosave();
 				}
 				else {
 					channel.sendMessage(NOT_RECOGNIZED_MESSAGE).queue();
@@ -154,6 +159,7 @@ public class Listener extends ListenerAdapter {
 					if(bank.addAlias(line[1], user.getIdLong())) {
 						channel.sendMessage("Using "+line[1]+" will now refer to "+user.getAsMention()).queue();
 						BankApplication.log("Alias added: "+line[1]+" to "+user.getName());
+						autosave();
 					}
 					else {
 						channel.sendMessage("Alias already taken.").queue();
@@ -192,6 +198,13 @@ public class Listener extends ListenerAdapter {
 					return null;
 				}
 			}
+		}
+	}
+	
+	private void autosave() {
+		if(System.currentTimeMillis()-lastSave>autosavePeriod) {
+			BankApplication.save();
+			lastSave = System.currentTimeMillis();
 		}
 	}
 
