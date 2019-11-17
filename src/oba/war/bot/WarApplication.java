@@ -52,6 +52,8 @@ public class WarApplication {
 		SudokuListener sudoku = new SudokuListener(discord.getTextChannelById((String) properties.get("slow_channel")));
 		sudoku.readState(new File((String) properties.get("sudoku_file")));
 		discord.addEventListener(sudoku);
+		
+		sudoku.sendGrid();
 	}
 
 	public static Properties getProperties() {

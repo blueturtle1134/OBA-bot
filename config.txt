@@ -3,3 +3,6 @@ bank_channel=635338756697751552
 fed_channel=637460270058569729
 log_file=log.txt
 bank_file=bank.json
+server=270763719619772416
+rank_file=ranks.txt
+autosave_period=5000

@@ -10,25 +10,34 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import oba.bank.money.Account;
 import oba.bank.money.Bank;
+import oba.bank.money.Rank;
 import oba.bank.money.Wring;
 
 public class Listener extends ListenerAdapter {
-	
+
+	private static final int PASSOVER_LIMIT = 30;
 	public static final long IMAGE_CYCLE = 1000;
+	public static final long PASSOVER_CYCLE = 20*60*1000;
 
 	private static final String NOT_RECOGNIZED_MESSAGE = "Name not recognized. Use the username without an @ or # and ID. Nicknames don't work yet.";
 	JDA discord = BankApplication.getDiscord();
 	Bank bank = BankApplication.getBank();
 	long lastImage = System.currentTimeMillis();
-	String bankChannel = (String) BankApplication.getProperties().get("bank_channel");
-	String fedChannel = (String) BankApplication.getProperties().get("fed_channel");
-	String bankFile = (String) BankApplication.getProperties().get("bank_file");
-	
+	long lastPassover = System.currentTimeMillis();
+	long lastSave = System.currentTimeMillis();
+	String bankChannel = BankApplication.getProperties().getProperty("bank_channel");
+	String fedChannel = BankApplication.getProperties().getProperty("fed_channel");
+	String bankFile = BankApplication.getProperties().getProperty("bank_file");
+	long autosavePeriod = Long.parseLong(BankApplication.getProperties().getProperty("autosave_period"));
+
 	@Override
 	public void onMessageReceived(MessageReceivedEvent e) {
+		if(e.getAuthor().isBot()) {
+			return;
+		}
 		MessageChannel channel = e.getChannel();
+		String contentRaw = e.getMessage().getContentRaw();
 		if(channel.getId().equals(bankChannel)) {
-			String contentRaw = e.getMessage().getContentRaw();
 			User author = e.getAuthor();
 			long authorId = author.getIdLong();
 			if(contentRaw.matches("^>transfer \\d+ .+")) {
@@ -53,6 +62,7 @@ public class Listener extends ListenerAdapter {
 					channel.sendMessage(author.getAsMention()+" claims a daily reward of "+dailyReward+" Chrona.").queue();
 					BankApplication.log(author.getName()+" claims a daily reward of "+dailyReward+" Chrona.");
 					bank.getAccount(authorId).resetDaily();
+					autosave();
 				}
 				else {
 					channel.sendMessage(author.getAsMention()+" has already claimed a reward in the last 24 hours!").queue();
@@ -60,6 +70,7 @@ public class Listener extends ListenerAdapter {
 			}
 			if(contentRaw.equals(">save")) {
 				BankApplication.save();
+				lastSave = System.currentTimeMillis();
 			}
 			if(contentRaw.equals(">wring")) {
 				int minutes = (int) ((System.currentTimeMillis()-bank.getWringTime())/(1000*60));
@@ -73,17 +84,69 @@ public class Listener extends ListenerAdapter {
 					amount = -1;
 				}
 				bank.change(authorId, amount);
+				autosave();
 				BankApplication.log(author.getName()+" wrings "+amount+" Chrona.");
+			}
+			if(contentRaw.equals(">rank")) {
+				int rankNum = Rank.getRank(e.getMember());
+				if(rankNum < 0) {
+					channel.sendMessage(e.getAuthor().getAsMention()+", you don't have a rank role! Assigning the lowest rank to you now.").queue();
+					Rank.changeRank(e.getMember(), 0);
+				}
+				else {
+					Rank rank = Rank.getRankByNumber(rankNum);
+					String output = e.getAuthor().getAsMention()+", your current rank is "+rank.getName();
+					if(rankNum<Rank.rankCount()) {
+						Rank next = Rank.getRankByNumber(rankNum+1);
+						output += "\nThe next rank is **"+next.getName()+"** and costs **"+next.getCost()+"** Chrona.";
+						if(next.getCost()<=bank.getBalance(authorId)) {
+							output += "\nYou can buy this rank now! (Use `>rankup` to buy next rank)";
+						}
+						else {
+							output += "\nYou need **"+(next.getCost()-bank.getBalance(authorId))+"** more Chrona to buy this rank.";
+						}
+					}
+					else {
+						output += "\nThat's the last rank.";
+					}
+					channel.sendMessage(output).queue();
+				}
+			}
+			if(contentRaw.equals(">rankup")) {
+				int rankNum = Rank.getRank(e.getMember());
+				if(rankNum < 0) {
+					channel.sendMessage(e.getAuthor().getAsMention()+", you don't have a rank role! Assigning the lowest rank to you now.").queue();
+					Rank.changeRank(e.getMember(), 0);
+				}
+				else {
+					if(rankNum<Rank.rankCount()) {
+						Rank next = Rank.getRankByNumber(rankNum+1);
+						if(next.getCost()<=bank.getBalance(authorId)) {
+							channel.sendMessage(e.getAuthor().getAsMention()+", you have spent "+next.getCost()+" Chrona to buy the **"+next.getName()+"** rank.").queue();
+							Rank.changeRank(e.getMember(), rankNum+1);
+							bank.change(authorId, -1*next.getCost());
+							BankApplication.log(author.getName()+" purchases "+next.getName()+" rank.");
+							autosave();
+						}
+						else {
+
+							channel.sendMessage(e.getAuthor().getAsMention()+", you need **"+(next.getCost()-bank.getBalance(authorId))+"** more Chrona to buy the next rank (**"+next.getName()+"**).").queue();
+						}
+					}
+					else {
+						channel.sendMessage(e.getAuthor().getAsMention()+" There are no more ranks to buy!").queue();
+					}
+				}
 			}
 		}
 		if(channel.getId().contentEquals(fedChannel)) {
-			String contentRaw = e.getMessage().getContentRaw();
 			if(contentRaw.matches("^>reward -?\\d+ .+")) {
 				String[] line = contentRaw.split(" ",3);
 				User user = identifyUser(line[2]);
 				if(user!=null) {
 					reward(channel, Integer.parseInt(line[1]), user);
 					BankApplication.log(e.getAuthor().getName()+" rewards "+line[1]+" Chrona to "+user.getName());
+					autosave();
 				}
 				else {
 					channel.sendMessage(NOT_RECOGNIZED_MESSAGE).queue();
@@ -96,6 +159,7 @@ public class Listener extends ListenerAdapter {
 					if(bank.addAlias(line[1], user.getIdLong())) {
 						channel.sendMessage("Using "+line[1]+" will now refer to "+user.getAsMention()).queue();
 						BankApplication.log("Alias added: "+line[1]+" to "+user.getName());
+						autosave();
 					}
 					else {
 						channel.sendMessage("Alias already taken.").queue();
@@ -106,12 +170,15 @@ public class Listener extends ListenerAdapter {
 				}
 			}
 		}
-		else if(e.getMessage().getContentRaw().matches("^[hH][aA][iI][lL].+!+")&&System.currentTimeMillis()-lastImage>IMAGE_CYCLE) {
+		else if(contentRaw.matches("^[hH][aA][iI][lL].+!+")&&System.currentTimeMillis()-lastImage>IMAGE_CYCLE) {
 			e.getChannel().sendFile(new File("hail.jpg")).queue();
 			lastImage = System.currentTimeMillis();
 		}
+		else if(contentRaw.contains("Christmas")&&System.currentTimeMillis()-lastPassover>PASSOVER_CYCLE&&contentRaw.length()>PASSOVER_LIMIT) {
+			e.getChannel().sendMessage("> "+contentRaw.replace("Christmas", "Passover")+"\nftfy").queue();
+		}
 	}
-	
+
 	private User identifyUser(String string) {
 		List<User> usersByName = discord.getUsersByName(string, true);
 		if(usersByName.size()>0) {
@@ -131,6 +198,13 @@ public class Listener extends ListenerAdapter {
 					return null;
 				}
 			}
+		}
+	}
+	
+	private void autosave() {
+		if(System.currentTimeMillis()-lastSave>autosavePeriod) {
+			BankApplication.save();
+			lastSave = System.currentTimeMillis();
 		}
 	}
 
