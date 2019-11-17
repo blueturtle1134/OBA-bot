@@ -6,7 +6,7 @@ import oba.war.bot.WarApplication;
 public class UnifiedApplication {
 
 	public static void main(String[] args) {
-		BankApplication.start(true);
+		BankApplication.start(false);
 		WarApplication.start();
 	}
 
