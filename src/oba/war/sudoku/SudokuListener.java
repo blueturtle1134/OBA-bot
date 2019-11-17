@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import oba.bank.bot.BankApplication;
 import oba.war.bot.WarApplication;
 
 public class SudokuListener extends ListenerAdapter {

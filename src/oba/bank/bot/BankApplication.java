@@ -18,7 +18,6 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.TextChannel;
 import oba.bank.gui.Controls;
 import oba.bank.money.Bank;
-import oba.war.sudoku.SudokuListener;
 
 public class BankApplication {
 	
