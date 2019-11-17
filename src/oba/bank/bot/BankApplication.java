@@ -154,7 +154,7 @@ public class BankApplication {
 	}
 
 	public static String getVersion() {
-		return "0.1.1";
+		return "1.0.0";
 	}
 	
 	public static Guild getGuild() {

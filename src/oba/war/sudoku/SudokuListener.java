@@ -42,9 +42,13 @@ public class SudokuListener extends ListenerAdapter {
 				else {
 					channel.sendMessage("Invalid location!").queue();
 				}
-				channel.sendMessage("```"+state.printGrid()+"```").queue();
+				sendGrid();
 			}
 		}
+	}
+
+	public void sendGrid() {
+		channel.sendMessage("```"+state.printGrid()+"```").queue();
 	}
 	
 	public void saveState(File file) {
