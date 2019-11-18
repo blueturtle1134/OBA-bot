@@ -29,6 +29,13 @@ public class Listener extends ListenerAdapter {
 	String fedChannel = BankApplication.getProperties().getProperty("fed_channel");
 	String bankFile = BankApplication.getProperties().getProperty("bank_file");
 	long autosavePeriod = Long.parseLong(BankApplication.getProperties().getProperty("autosave_period"));
+	
+	public static final String HELP = "List of commands:\n"
+			+ "`>balance` - see your current balance\n"
+			+ "`>transfer <x> <y>` - transfer **y** chrona to **x**\n"
+			+ "`>daily` - collect your daily reward\n"
+			+ "`>wring` - collect the money in the wring pool. The wring pool charges more slowly if wrung repeatedly.\n"
+			+ "`>rank` - see your current rank";
 
 	@Override
 	public void onMessageReceived(MessageReceivedEvent e) {
@@ -137,6 +144,9 @@ public class Listener extends ListenerAdapter {
 						channel.sendMessage(e.getAuthor().getAsMention()+" There are no more ranks to buy!").queue();
 					}
 				}
+			}
+			if(contentRaw.equals(">help")) {
+				channel.sendMessage(HELP).queue();
 			}
 		}
 		if(channel.getId().contentEquals(fedChannel)) {
